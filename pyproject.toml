@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "crawlersiac"
+version = "0.1.0"
+description = ""
+authors = ["Álvaro Souza <alvarosouza@escavador.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aiohttp = "^3.9.5"
+parsel = "^1.9.1"
+dynaconf = "^3.2.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
