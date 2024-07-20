@@ -1,0 +1,26 @@
+[flake8]
+max-line-length = 120
+max-complexity = 18
+ignore =
+    # these rules don't play well with black
+    # whitespace before :
+    E203
+    # whitespace after ,
+    E231
+    # line break before binary operator
+    W503
+    # do not use bare 'except'
+    E722
+    # comparison to None should be 'if cond is None:'
+    E711
+    # Black now formats dummy implementations to have '...' in the same line
+    # See: https://github.com/psf/black/issues/4173
+    E701
+    E704
+
+exclude =
+    .venv/**
+
+per-file-ignores =
+    # __init__.py files are allowed to have unused imports and lines-too-long
+    */__init__.py:F401

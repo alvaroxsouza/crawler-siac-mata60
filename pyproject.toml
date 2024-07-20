@@ -10,6 +10,8 @@ python = "^3.12"
 aiohttp = "^3.9.5"
 parsel = "^1.9.1"
 dynaconf = "^3.2.6"
+black = "^24.4.2"
+flake8 = "^7.1.0"
 
 
 [build-system]
