@@ -1,8 +1,43 @@
 import aiohttp
 
-from crawlersiac.Model import Curso
+from crawlersiac.Model import Curso, Disciplina
 from crawlersiac.config import settings as config
 from parsel import Selector
+
+# class Disciplina:
+#     def __init__(
+#         self,
+#         nome="",
+#         codigo="",
+#         natureza="",
+#         semestre="",
+#         pre_requisitos=[],
+#         carga_horaria_teorica="",
+#         carga_horaria_pratica="",
+#         carga_horaria_estagio="",
+#         carga_horaria_total="",
+#         semestre_vigente="",
+#         departamento="",
+#         ementa="",
+#         bibliografia="",
+#         objetivos="",
+#         conteudo="",
+#     ):
+#         self.nome = nome
+#         self.codigo = codigo
+#         self.natureza = natureza
+#         self.semestre = semestre
+#         self.pre_requisitos = pre_requisitos
+#         self.carga_horaria_pratica = carga_horaria_pratica
+#         self.carga_horaria_teorica = carga_horaria_teorica
+#         self.carga_horaria_estagio = carga_horaria_estagio
+#         self.carga_horaria_total = carga_horaria_total
+#         self.departamento = departamento
+#         self.ementa = ementa
+#         self.bibliografia = bibliografia
+#         self.objetivos = objetivos
+#         self.conteudo = conteudo
+#         self.semestre_vigente = semestre_vigente
 
 
 class Scrapper:
@@ -25,6 +60,36 @@ class Scrapper:
             "senha": config.LOGIN_SIAC.PASSWORD,
         }
 
+    @staticmethod
+    async def extrair_detalhes_disciplina(session, link):
+        async with session.get(config.LOGIN_SIAC.URL_BASE + link) as response:
+            html = await response.text()
+            selector = Selector(text=html)
+            tr_even_info = selector.xpath('//table/tr[3]/td[2]/center[2]/table/tr[@class="even"]')
+            carga_horaria_teorica = tr_even_info[1].xpath("./td[1]/text()").get()
+            carga_horaria_pratica = tr_even_info[1].xpath("./td[2]/text()").get()
+            carga_horaria_estagio = tr_even_info[1].xpath("./td[3]/text()").get()
+            carga_horaria_total = str(int(carga_horaria_pratica) + int(carga_horaria_teorica) + int(carga_horaria_estagio))
+            departamento = tr_even_info[1].xpath("./td[4]/text()").get()
+            semestre_vigente = tr_even_info[1].xpath("./td[5]/text()").get()
+            ementa = tr_even_info[2].xpath("./td/text()").get()
+            objetivos = tr_even_info[3].xpath("./td/text()").get()
+            conteudo = tr_even_info[4].xpath("./td/text()").get()
+            bibliografia = tr_even_info[5].xpath("./td/text()").get()
+
+        return (
+            carga_horaria_pratica,
+            carga_horaria_estagio,
+            carga_horaria_teorica,
+            carga_horaria_total,
+            departamento,
+            ementa,
+            bibliografia,
+            objetivos,
+            conteudo,
+            semestre_vigente,
+        )
+
     async def extrair_disciplinas(self, session, link):
         lista_disciplinas = []
         async with session.get(config.LOGIN_SIAC.URL_BASE + link) as response:
@@ -35,13 +100,44 @@ class Scrapper:
                 '//center/table/tr[@class="odd" or @class="even"]'
             ):
                 semestre = tr.xpath("./td[1]/text()").get()
-                if semestre.strip() is not "":
+                if semestre.strip() != "":
                     semestre_fix = semestre
+                natureza = tr.xpath("./td[2]/text()").get()
+                codigo = tr.xpath("./td[3]/text()").get()
+                nome = tr.xpath("./td[4]/a/text()").get()
+                link = tr.xpath("./td[4]/a/@href").get()
+                pre_requisito = tr.xpath("./td[5]/text()").get()
 
-                disciplina = {
-                    "semestre": semestre_fix,
-                }
-                lista_disciplinas.append(disciplina)
+                (
+                    carga_horaria_pratica,
+                    carga_horaria_estagio,
+                    carga_horaria_teorica,
+                    carga_horaria_total,
+                    departamento,
+                    ementa,
+                    bibliografia,
+                    objetivos,
+                    conteudo,
+                    semestre_vigente,
+                ) = await self.extrair_detalhes_disciplina(session, link)
+
+                disciplina = Disciplina(
+                    nome=nome,
+                    codigo=codigo,
+                    natureza=natureza,
+                    semestre=semestre_fix,
+                    pre_requisitos=pre_requisito,
+                    carga_horaria_pratica=carga_horaria_pratica,
+                    carga_horaria_teorica=carga_horaria_teorica,
+                    carga_horaria_estagio=carga_horaria_estagio,
+                    carga_horaria_total=carga_horaria_total,
+                    departamento=departamento,
+                    ementa=ementa,
+                    bibliografia=bibliografia,
+                    objetivos=objetivos,
+                    conteudo=conteudo,
+                    semestre_vigente=semestre_vigente,
+                )
 
         return lista_disciplinas
 
