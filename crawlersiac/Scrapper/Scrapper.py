@@ -214,7 +214,7 @@ class Scrapper:
                     cursos_info.append(curso)
         return cursos_info
 
-    async def fazer_login(self):
+    async def crawler_siac_run(self):
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(
@@ -230,4 +230,4 @@ class Scrapper:
             print(f"Erro ao tentar fazer login: {e}")
 
     async def run(self):
-        await self.fazer_login()
+        await self.crawler_siac_run()
