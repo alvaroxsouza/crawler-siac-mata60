@@ -14,6 +14,8 @@ class Curso:
         info_carga_horaria,
         link_obrigatoria,
         link_optativa,
+        disciplinas_obrigatorias,
+        disciplinas_optativas,
     ):
         self.nome = nome
         self.codigo = codigo
