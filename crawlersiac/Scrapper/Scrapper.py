@@ -4,41 +4,6 @@ from crawlersiac.Model import Curso, Disciplina
 from crawlersiac.config import settings as config
 from parsel import Selector
 
-# class Disciplina:
-#     def __init__(
-#         self,
-#         nome="",
-#         codigo="",
-#         natureza="",
-#         semestre="",
-#         pre_requisitos=[],
-#         carga_horaria_teorica="",
-#         carga_horaria_pratica="",
-#         carga_horaria_estagio="",
-#         carga_horaria_total="",
-#         semestre_vigente="",
-#         departamento="",
-#         ementa="",
-#         bibliografia="",
-#         objetivos="",
-#         conteudo="",
-#     ):
-#         self.nome = nome
-#         self.codigo = codigo
-#         self.natureza = natureza
-#         self.semestre = semestre
-#         self.pre_requisitos = pre_requisitos
-#         self.carga_horaria_pratica = carga_horaria_pratica
-#         self.carga_horaria_teorica = carga_horaria_teorica
-#         self.carga_horaria_estagio = carga_horaria_estagio
-#         self.carga_horaria_total = carga_horaria_total
-#         self.departamento = departamento
-#         self.ementa = ementa
-#         self.bibliografia = bibliografia
-#         self.objetivos = objetivos
-#         self.conteudo = conteudo
-#         self.semestre_vigente = semestre_vigente
-
 
 class Scrapper:
     def __init__(self, url):
