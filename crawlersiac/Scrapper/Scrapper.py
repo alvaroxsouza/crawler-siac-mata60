@@ -138,6 +138,7 @@ class Scrapper:
                     conteudo=conteudo,
                     semestre_vigente=semestre_vigente,
                 )
+                lista_disciplinas.append(disciplina)
 
         return lista_disciplinas
 
