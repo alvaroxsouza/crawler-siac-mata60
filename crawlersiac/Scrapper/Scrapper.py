@@ -75,6 +75,9 @@ class Scrapper:
                     codigo = tr.xpath("./td[3]/text()").get()
                     nome = tr.xpath("./td[4]/a/text()").get()
                     link = tr.xpath("./td[4]/a/@href").get()
+                    if link is None:
+                        nome = tr.xpath("./td[4]/text()").get()
+
                     pre_requisito = tr.xpath("./td[5]/text()").get()
 
                     print("Crawler da disciplina: ", nome, " - ", codigo)
