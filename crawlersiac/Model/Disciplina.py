@@ -8,7 +8,6 @@ class Disciplina:
         codigo="",
         natureza="",
         semestre="",
-        pre_requisitos=[],
         carga_horaria_teorica="",
         carga_horaria_pratica="",
         carga_horaria_estagio="",
@@ -24,7 +23,6 @@ class Disciplina:
         self.codigo = codigo
         self.natureza = natureza
         self.semestre = semestre
-        self.pre_requisitos = pre_requisitos
         self.carga_horaria_pratica = carga_horaria_pratica
         self.carga_horaria_teorica = carga_horaria_teorica
         self.carga_horaria_estagio = carga_horaria_estagio
@@ -52,7 +50,6 @@ class Disciplina:
             f" {self.bibliografia} -"
             f" {self.objetivos} -"
             f" {self.conteudo} -"
-            f" {self.pre_requisitos} -"
             f" {self.semestre_vigente} -"
             f" {self.departamento} -"
             f" {self.ementa} -"
