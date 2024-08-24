@@ -56,15 +56,15 @@ class CriarScriptCarga:
     def gerar_script_carga_disciplina(self, disciplina):
 
         # Cria a linha de inserção para a disciplina
-        linha_insert = f"""INSERT INTO Disciplina (codigo_disciplina,nome_disciplina,semestre,carga_horaria_pratica,carga_horaria_teorica,carga_horaria_estagio,carga_horaria_total,nome_departamento,ementa,bibliografia,objetivos,conteudo,semestre_vigente,id_departamento) VALUES ('{disciplina.codigo}','{disciplina.nome}','{disciplina.semestre}','{disciplina.carga_horaria_pratica}','{disciplina.carga_horaria_teorica}','{disciplina.carga_horaria_estagio}','{disciplina.carga_horaria_total}','{disciplina.departamento}','{disciplina.ementa}','{disciplina.bibliografia}','{disciplina.objetivos}','{disciplina.conteudo}','{disciplina.semestre_vigente}', 0);\n"""
+        linha_insert = f"""INSERT INTO Disciplina (codigo_disciplina,nome_disciplina,carga_horaria_pratica,carga_horaria_teorica,carga_horaria_estagio,carga_horaria_total,nome_departamento,ementa,bibliografia,objetivos,conteudo,id_departamento) VALUES ('{disciplina.codigo}','{disciplina.nome}','{disciplina.carga_horaria_pratica}','{disciplina.carga_horaria_teorica}','{disciplina.carga_horaria_estagio}','{disciplina.carga_horaria_total}','{disciplina.departamento}','{disciplina.ementa}','{disciplina.bibliografia}','{disciplina.objetivos}','{disciplina.conteudo}'', 0);\n"""
 
         # Adiciona a linha de inserção ao arquivo
         with open(self.nome_arquivo_disciplina, "a") as arquivo:
             arquivo.write(linha_insert)
 
-    def gerar_script_carga_curso_disciplina(self, codigo_curso, codigo_disciplina, natureza):
+    def gerar_script_carga_curso_disciplina(self, codigo_curso, codigo_disciplina, natureza, semestre_previsto, semestre_vigente):
         # Cria a linha de inserção para o relacionamento curso-disciplina
-        linha_insert = f"""INSERT INTO CursoDisciplina (codigo_curso,codigo_disciplina, natureza) VALUES ('{codigo_curso}','{codigo_disciplina}', '{natureza}');\n"""
+        linha_insert = f"""INSERT INTO CursoDisciplina (codigo_curso,codigo_disciplina, natureza, semestre_previsto, semestre_vigente) VALUES ('{codigo_curso}','{codigo_disciplina}', '{natureza}', '{semestre_previsto}, '{semestre_vigente}');\n"""
 
         # Adiciona a linha de inserção ao arquivo com encoding utf-8-sig
         with open(self.nome_arquivo_curso_disciplina, "a", encoding="utf-8-sig") as arquivo:

@@ -86,9 +86,10 @@ class Scrapper:
                 for tr in selector.xpath(
                     '//center/table/tr[@class="odd" or @class="even"]'
                 ):
-                    semestre = tr.xpath("./td[1]/text()").get()
-                    if semestre.strip() != "":
-                        semestre_fix = semestre
+                    pattern = re.compile(r'\\$')
+                    semestre_previsto = tr.xpath("./td[1]/text()").get()
+                    if semestre_previsto.strip() != "":
+                        semestre_fix = semestre_previsto
                     natureza = tr.xpath("./td[2]/text()").get()
                     codigo_disciplina = tr.xpath("./td[3]/text()").get()
                     nome = tr.xpath("./td[4]/a/text()").get()
@@ -97,10 +98,13 @@ class Scrapper:
                         nome = tr.xpath("./td[4]/text()").get()
                         nome = nome.strip()
                         nome = nome.replace("'", "''")
+                        nome = pattern.sub('', nome)
 
                     if nome is not None:
                         nome = nome.strip()
                         nome = nome.replace("'", "''")
+                        nome = pattern.sub('', nome)
+
 
                     pre_requisitos = tr.xpath("./td[5]/text()").get()
 
@@ -152,7 +156,7 @@ class Scrapper:
                         semestre_vigente=semestre_vigente,
                     )
                     CriarScriptCarga().gerar_script_carga_disciplina(disciplina)
-                    CriarScriptCarga().gerar_script_carga_curso_disciplina(codigo_curso, codigo_disciplina, natureza)
+                    CriarScriptCarga().gerar_script_carga_curso_disciplina(codigo_curso, codigo_disciplina, natureza, semestre_previsto, semestre_vigente)
         except Exception as e:
             print(f"Erro ao tentar extrair as disciplinas: {e}")
 
