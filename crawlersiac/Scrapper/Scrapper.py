@@ -152,7 +152,7 @@ class Scrapper:
                         semestre_vigente=semestre_vigente,
                     )
                     CriarScriptCarga().gerar_script_carga_disciplina(disciplina)
-                    CriarScriptCarga().gerar_script_carga_curso_disciplina(codigo_curso, codigo_disciplina)
+                    CriarScriptCarga().gerar_script_carga_curso_disciplina(codigo_curso, codigo_disciplina, natureza)
         except Exception as e:
             print(f"Erro ao tentar extrair as disciplinas: {e}")
 
