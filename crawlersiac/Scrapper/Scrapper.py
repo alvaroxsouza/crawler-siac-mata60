@@ -117,10 +117,10 @@ class Scrapper:
                             semestre_vigente,
                         ) = await self.extrair_detalhes_disciplina(session, link)
                     else:
-                        carga_horaria_pratica = ""
-                        carga_horaria_estagio = ""
-                        carga_horaria_teorica = ""
-                        carga_horaria_total = ""
+                        carga_horaria_pratica = 0
+                        carga_horaria_estagio = 0
+                        carga_horaria_teorica = 0
+                        carga_horaria_total = 0
                         departamento = ""
                         ementa = ""
                         bibliografia = ""
