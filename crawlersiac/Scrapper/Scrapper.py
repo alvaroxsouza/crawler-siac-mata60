@@ -44,15 +44,19 @@ class Scrapper:
                 ementa = tr_even_info[2].xpath("./td/text()").get()
                 if ementa is not None:
                     ementa = re.sub(r'\s+', ' ', ementa).strip()
+                    ementa = ementa.replace("'", "''")
                 objetivos = tr_even_info[3].xpath("./td/text()").get()
                 if objetivos is not None:
                     objetivos = re.sub(r'\s+', ' ', objetivos).strip()
+                    objetivos = objetivos.replace("'", "''")
                 conteudo = tr_even_info[4].xpath("./td/text()").get()
                 if conteudo is not None:
                     conteudo = re.sub(r'\s+', ' ', conteudo).strip()
+                    conteudo = conteudo.replace("'", "''")
                 bibliografia = tr_even_info[5].xpath("./td/text()").get()
                 if bibliografia is not None:
                     bibliografia = re.sub(r'\s+', ' ', bibliografia).strip()
+                    bibliografia = bibliografia.replace("'", "''")
 
             return (
                 carga_horaria_pratica,
