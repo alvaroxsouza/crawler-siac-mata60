@@ -39,6 +39,10 @@ class Scrapper:
                 carga_horaria_estagio = tr_even_info[1].xpath("./td[3]/text()").get()
                 carga_horaria_total = str(int(carga_horaria_pratica) + int(carga_horaria_teorica) + int(carga_horaria_estagio))
                 departamento = tr_even_info[1].xpath("./td[4]/text()").get()
+                if departamento is not None:
+                    departamento = departamento.strip()
+                    departamento = departamento.replace("'", "''")
+
                 semestre_vigente = tr_even_info[1].xpath("./td[5]/text()").get()
 
                 ementa = tr_even_info[2].xpath("./td/text()").get()
@@ -91,9 +95,12 @@ class Scrapper:
                     link = tr.xpath("./td[4]/a/@href").get()
                     if link is None:
                         nome = tr.xpath("./td[4]/text()").get()
+                        nome = nome.strip()
+                        nome = nome.replace("'", "''")
 
                     if nome is not None:
                         nome = nome.strip()
+                        nome = nome.replace("'", "''")
 
                     pre_requisitos = tr.xpath("./td[5]/text()").get()
 
@@ -161,7 +168,14 @@ class Scrapper:
                     tr_curso = selector.xpath('//center/table/tr[@class="even"][1]')
                     codigo, nome = tr_curso.xpath("./td[1]/text()").get().split(" - ", 1)
                     print(f"Crawler do curso: {nome} - {codigo}")
+                    if nome is not None:
+                        nome = nome.strip()
+                        nome = nome.replace("'", "''")
+
                     turno = tr_curso.xpath("./td[2]/text()").get()
+                    if turno is not None:
+                        turno = turno.strip()
+                        turno = turno.replace("'", "''")
                     duracao_minima = tr_curso.xpath("./td[3]/text()").get()
                     duracao_maxima = tr_curso.xpath("./td[4]/text()").get()
                     periodo_curriculo = tr_curso.xpath("./td[5]/text()").get()
@@ -170,11 +184,14 @@ class Scrapper:
                     ).get()
                     if descricao_base_legal is not None:
                         descricao_base_legal = re.sub(r'\s+', ' ', descricao_base_legal).strip()
+                        descricao_base_legal = descricao_base_legal.replace("'", "''")
                     descricao_profissional = selector.xpath(
                         '//center/table/tr[@class="even"][3]/td/text()'
                     ).get()
                     if descricao_profissional is not None:
                         descricao_profissional = re.sub(r'\s+', ' ', descricao_profissional).strip()
+                        descricao_profissional = descricao_profissional.replace("'", "''")
+
                     table_carga_horaria = selector.xpath("//center[4]/table")
                     lista_carga_horaria = []
                     for tr in table_carga_horaria.xpath("./tr[position()>1]"):
