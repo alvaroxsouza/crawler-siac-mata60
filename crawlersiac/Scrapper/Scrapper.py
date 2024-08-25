@@ -83,19 +83,17 @@ class Scrapper:
     async def extrair_disciplinas(self, session, link, codigo_curso):
         try:
             async with session.get(config.LOGIN_SIAC.URL_BASE + link) as response:
-                tasks = []
                 html = await response.text()
                 selector = Selector(text=html)
                 semestre_fix = ""
-                max_tasks = 10
 
                 for tr in selector.xpath(
                         '//center/table/tr[@class="odd" or @class="even"]'
                 ):
-                    tasks.append(self.extrair_disciplinas_curso(codigo_curso, semestre_fix, session, tr))
-                    if len(tasks) == max_tasks:
-                        await asyncio.gather(*tasks)
-                        tasks = []
+                    await self.extrair_disciplinas_curso(codigo_curso, semestre_fix, session, tr)
+                    # if len(tasks) == max_tasks:
+                    #     await asyncio.gather(*tasks)
+                    #     tasks = []
         except Exception as e:
             print(f"Erro ao tentar extrair as disciplinas: {e}")
 
