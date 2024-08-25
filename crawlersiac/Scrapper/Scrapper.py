@@ -12,6 +12,7 @@ from parsel import Selector
 class Scrapper:
     def __init__(self, url):
         self.url = url
+        self.disciplinas_processadas = set()
 
     async def __aenter__(self):
         return self
@@ -98,11 +99,17 @@ class Scrapper:
             print(f"Erro ao tentar extrair as disciplinas: {e}")
 
     async def extrair_disciplinas_curso(self, codigo_curso, semestre_fix, session, tr):
+
         semestre_previsto = tr.xpath("./td[1]/text()").get()
         if semestre_previsto.strip() != "":
             semestre_fix = semestre_previsto
         natureza = tr.xpath("./td[2]/text()").get()
         codigo_disciplina = tr.xpath("./td[3]/text()").get()
+
+        if codigo_disciplina in self.disciplinas_processadas:
+            return
+
+        self.disciplinas_processadas.add(codigo_disciplina)
         nome = tr.xpath("./td[4]/a/text()").get()
         link = tr.xpath("./td[4]/a/@href").get()
         if link is None:
@@ -162,12 +169,16 @@ class Scrapper:
                                                                semestre_previsto, semestre_vigente)
 
     async def extrair_cursos(self, session, cursos_info):
-        tasks = []
+        coros = []
         max_exec = 10
         for curso in cursos_info:
-            tasks.append(self.scrapper_cursos_disciplinas(curso, session))
-        for i in range(0, len(tasks), max_exec):
-            await asyncio.gather(*tasks[i: i + max_exec])
+            coros.append(self.scrapper_cursos_disciplinas(curso, session))
+            if len(coros) == max_exec:
+                await asyncio.gather(*coros)
+                coros = []
+
+        # for i in range(0, len(tasks), max_exec):
+        #     await asyncio.gather(*tasks[i: i + max_exec])
 
     async def scrapper_cursos_disciplinas(self, curso, session):
         try:
