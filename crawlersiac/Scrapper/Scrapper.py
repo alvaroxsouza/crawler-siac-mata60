@@ -8,6 +8,7 @@ from crawlersiac.Scrapper import CriarScriptCarga
 from crawlersiac.config import settings as config
 from parsel import Selector
 
+
 class Scrapper:
     def __init__(self, url):
         self.url = url
@@ -38,7 +39,8 @@ class Scrapper:
                 carga_horaria_teorica = tr_even_info[1].xpath("./td[1]/text()").get()
                 carga_horaria_pratica = tr_even_info[1].xpath("./td[2]/text()").get()
                 carga_horaria_estagio = tr_even_info[1].xpath("./td[3]/text()").get()
-                carga_horaria_total = str(int(carga_horaria_pratica) + int(carga_horaria_teorica) + int(carga_horaria_estagio))
+                carga_horaria_total = str(
+                    int(carga_horaria_pratica) + int(carga_horaria_teorica) + int(carga_horaria_estagio))
                 departamento = tr_even_info[1].xpath("./td[4]/text()").get()
                 if departamento is not None:
                     departamento = departamento.strip()
@@ -81,86 +83,89 @@ class Scrapper:
     async def extrair_disciplinas(self, session, link, codigo_curso):
         try:
             async with session.get(config.LOGIN_SIAC.URL_BASE + link) as response:
+                tasks = []
                 html = await response.text()
                 selector = Selector(text=html)
                 semestre_fix = ""
+                max_tasks = 10
+
                 for tr in selector.xpath(
-                    '//center/table/tr[@class="odd" or @class="even"]'
+                        '//center/table/tr[@class="odd" or @class="even"]'
                 ):
-                    semestre_previsto = tr.xpath("./td[1]/text()").get()
-                    if semestre_previsto.strip() != "":
-                        semestre_fix = semestre_previsto
-                    natureza = tr.xpath("./td[2]/text()").get()
-                    codigo_disciplina = tr.xpath("./td[3]/text()").get()
-                    nome = tr.xpath("./td[4]/a/text()").get()
-                    link = tr.xpath("./td[4]/a/@href").get()
-                    if link is None:
-                        nome = tr.xpath("./td[4]/text()").get()
-                        nome = nome.strip()
-                        nome = nome.replace("'", "''")
-
-                    if nome is not None:
-                        nome = nome.strip()
-                        nome = nome.replace("'", "''")
-
-
-                    pre_requisitos = tr.xpath("./td[5]/text()").get()
-
-                    if pre_requisitos != "--":
-                        for pre_requisito in pre_requisitos.split(", "):
-                            CriarScriptCarga().gerar_script_carga_disciplina_pre_requisito(codigo_disciplina, pre_requisito)
-
-                    print("Crawler da disciplina: ", nome, " - ", codigo_disciplina)
-
-                    if link is not None:
-                        (
-                            carga_horaria_pratica,
-                            carga_horaria_estagio,
-                            carga_horaria_teorica,
-                            carga_horaria_total,
-                            departamento,
-                            ementa,
-                            bibliografia,
-                            objetivos,
-                            conteudo,
-                            semestre_vigente,
-                        ) = await self.extrair_detalhes_disciplina(session, link)
-                    else:
-                        carga_horaria_pratica = 0
-                        carga_horaria_estagio = 0
-                        carga_horaria_teorica = 0
-                        carga_horaria_total = 0
-                        departamento = ""
-                        ementa = ""
-                        bibliografia = ""
-                        objetivos = ""
-                        conteudo = ""
-                        semestre_vigente = ""
-
-                    disciplina = Disciplina(
-                        nome=nome,
-                        codigo=codigo_disciplina,
-                        natureza=natureza,
-                        semestre=semestre_fix,
-                        carga_horaria_pratica=carga_horaria_pratica,
-                        carga_horaria_teorica=carga_horaria_teorica,
-                        carga_horaria_estagio=carga_horaria_estagio,
-                        carga_horaria_total=carga_horaria_total,
-                        departamento=departamento,
-                        ementa=ementa,
-                        bibliografia=bibliografia,
-                        objetivos=objetivos,
-                        conteudo=conteudo,
-                        semestre_vigente=semestre_vigente,
-                    )
-                    CriarScriptCarga().gerar_script_carga_disciplina(disciplina)
-                    CriarScriptCarga().gerar_script_carga_curso_disciplina(codigo_curso, codigo_disciplina, natureza, semestre_previsto, semestre_vigente)
+                    tasks.append(self.extrair_disciplinas_curso(codigo_curso, semestre_fix, session, tr))
+                    if len(tasks) == max_tasks:
+                        await asyncio.gather(*tasks)
+                        tasks = []
         except Exception as e:
             print(f"Erro ao tentar extrair as disciplinas: {e}")
 
+    async def extrair_disciplinas_curso(self, codigo_curso, semestre_fix, session, tr):
+        semestre_previsto = tr.xpath("./td[1]/text()").get()
+        if semestre_previsto.strip() != "":
+            semestre_fix = semestre_previsto
+        natureza = tr.xpath("./td[2]/text()").get()
+        codigo_disciplina = tr.xpath("./td[3]/text()").get()
+        nome = tr.xpath("./td[4]/a/text()").get()
+        link = tr.xpath("./td[4]/a/@href").get()
+        if link is None:
+            nome = tr.xpath("./td[4]/text()").get()
+            nome = nome.strip()
+            nome = nome.replace("'", "''")
+        if nome is not None:
+            nome = nome.strip()
+            nome = nome.replace("'", "''")
+        pre_requisitos = tr.xpath("./td[5]/text()").get()
+        if pre_requisitos != "--":
+            for pre_requisito in pre_requisitos.split(", "):
+                CriarScriptCarga().gerar_script_carga_disciplina_pre_requisito(codigo_disciplina, pre_requisito)
+        print("Crawler da disciplina: ", nome, " - ", codigo_disciplina)
+        if link is not None:
+            (
+                carga_horaria_pratica,
+                carga_horaria_estagio,
+                carga_horaria_teorica,
+                carga_horaria_total,
+                departamento,
+                ementa,
+                bibliografia,
+                objetivos,
+                conteudo,
+                semestre_vigente,
+            ) = await self.extrair_detalhes_disciplina(session, link)
+        else:
+            carga_horaria_pratica = 0
+            carga_horaria_estagio = 0
+            carga_horaria_teorica = 0
+            carga_horaria_total = 0
+            departamento = ""
+            ementa = ""
+            bibliografia = ""
+            objetivos = ""
+            conteudo = ""
+            semestre_vigente = ""
+        disciplina = Disciplina(
+            nome=nome,
+            codigo=codigo_disciplina,
+            natureza=natureza,
+            semestre=semestre_fix,
+            carga_horaria_pratica=carga_horaria_pratica,
+            carga_horaria_teorica=carga_horaria_teorica,
+            carga_horaria_estagio=carga_horaria_estagio,
+            carga_horaria_total=carga_horaria_total,
+            departamento=departamento,
+            ementa=ementa,
+            bibliografia=bibliografia,
+            objetivos=objetivos,
+            conteudo=conteudo,
+            semestre_vigente=semestre_vigente,
+        )
+        CriarScriptCarga().gerar_script_carga_disciplina(disciplina)
+        CriarScriptCarga().gerar_script_carga_curso_disciplina(codigo_curso, codigo_disciplina, natureza,
+                                                               semestre_previsto, semestre_vigente)
+
     async def extrair_cursos(self, session, cursos_info):
         tasks = []
-        max_exec = 100
+        max_exec = 40
         for curso in cursos_info:
             tasks.append(self.scrapper_cursos_disciplinas(curso, session))
         for i in range(0, len(tasks), max_exec):
@@ -296,8 +301,8 @@ class Scrapper:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    self.url + config.LOGIN_SIAC.URL_SIAC_LOGIN,
-                    data=self.payload_login(),
+                        self.url + config.LOGIN_SIAC.URL_SIAC_LOGIN,
+                        data=self.payload_login(),
                 ) as response:
                     links_classes_cursos = await self.extrair_link_por_tipo_curso(session)
                     cursos_info = await self.extrair_links_cursos(
