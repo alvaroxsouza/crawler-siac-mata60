@@ -33,7 +33,7 @@ class CriarScriptCarga:
 
     def gerar_script_carga_curso(self, curso):
         # Cria a linha de inserção para o curso
-        linha_insert = f"""INSERT INTO Curso (nome,codigo,link,turno,campus,duracao_minima,duracao_maxima,periodo_curriculo,descricao_base_legal,descricao_profissional,info_carga_horaria, id_departamento) VALUES ('{curso.nome}','{curso.codigo}','{curso.link}','{curso.turno}','{curso.campus}','{curso.duracao_minima}','{curso.duracao_maxima}','{curso.periodo_curriculo}','{curso.descricao_base_legal}','{curso.descricao_profissional}','{self._formatar_lista_carga_horaria(curso.info_carga_horaria)}', 0');\n"""
+        linha_insert = f"""INSERT INTO Curso (nome,codigo,link,turno,campus,duracao_minima,duracao_maxima,periodo_curriculo,descricao_base_legal,descricao_profissional,info_carga_horaria, id_departamento) VALUES ('{curso.nome}','{curso.codigo}','{curso.link}','{curso.turno}','{curso.campus}','{curso.duracao_minima}','{curso.duracao_maxima}','{curso.periodo_curriculo}','{curso.descricao_base_legal}','{curso.descricao_profissional}','{self._formatar_lista_carga_horaria(curso.info_carga_horaria)}', 0);\n"""
 
         # Adiciona a linha de inserção ao arquivo com encoding utf-8-sig
         with open(self.nome_arquivo_curso, "a", encoding="utf-8-sig") as arquivo:
