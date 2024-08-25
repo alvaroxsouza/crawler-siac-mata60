@@ -87,7 +87,6 @@ class Scrapper:
                 for tr in selector.xpath(
                     '//center/table/tr[@class="odd" or @class="even"]'
                 ):
-                    pattern = re.compile(r'\\$')
                     semestre_previsto = tr.xpath("./td[1]/text()").get()
                     if semestre_previsto.strip() != "":
                         semestre_fix = semestre_previsto
@@ -99,12 +98,10 @@ class Scrapper:
                         nome = tr.xpath("./td[4]/text()").get()
                         nome = nome.strip()
                         nome = nome.replace("'", "''")
-                        nome = pattern.sub('', nome)
 
                     if nome is not None:
                         nome = nome.strip()
                         nome = nome.replace("'", "''")
-                        nome = pattern.sub('', nome)
 
 
                     pre_requisitos = tr.xpath("./td[5]/text()").get()
