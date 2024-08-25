@@ -172,10 +172,7 @@ class Scrapper:
         coros = []
         max_exec = 10
         for curso in cursos_info:
-            coros.append(self.scrapper_cursos_disciplinas(curso, session))
-            if len(coros) == max_exec:
-                await asyncio.gather(*coros)
-                coros = []
+            await self.scrapper_cursos_disciplinas(curso, session)
 
         # for i in range(0, len(tasks), max_exec):
         #     await asyncio.gather(*tasks[i: i + max_exec])
@@ -259,12 +256,10 @@ class Scrapper:
 
                 CriarScriptCarga("Curso").gerar_script_carga_curso(curso)
 
-                await self.extrair_disciplinas(
-                    session, link_obrigatoria, codigo
-                )
-                await self.extrair_disciplinas(
-                    session, link_optativa, codigo
-                )
+                for link in [link_obrigatoria, link_optativa]:
+                    await self.extrair_disciplinas(
+                        session, link, codigo
+                    )
 
         except Exception as e:
             print(f"Erro ao tentar extrair o curso {curso.get('link')}: {e}")
