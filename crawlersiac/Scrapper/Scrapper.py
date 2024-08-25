@@ -87,9 +87,9 @@ class Scrapper:
                 selector = Selector(text=html)
                 semestre_fix = ""
 
-                for tr in selector.xpath(
-                        '//center/table/tr[@class="odd" or @class="even"]'
-                ):
+                trs = selector.xpath('//center/table/tr[@class="odd" or @class="even"]')
+
+                for tr in trs.copy():
                     await self.extrair_disciplinas_curso(codigo_curso, semestre_fix, session, tr)
                     # if len(tasks) == max_tasks:
                     #     await asyncio.gather(*tasks)
@@ -163,7 +163,7 @@ class Scrapper:
 
     async def extrair_cursos(self, session, cursos_info):
         tasks = []
-        max_exec = 40
+        max_exec = 10
         for curso in cursos_info:
             tasks.append(self.scrapper_cursos_disciplinas(curso, session))
         for i in range(0, len(tasks), max_exec):
