@@ -1,3 +1,4 @@
+import asyncio
 import re
 
 import aiohttp
@@ -161,94 +162,101 @@ class Scrapper:
             print(f"Erro ao tentar extrair as disciplinas: {e}")
 
     async def extrair_cursos(self, session, cursos_info):
+        tasks = []
+        max_exec = 100
         for curso in cursos_info:
-            try:
-                async with session.get(
-                        config.LOGIN_SIAC.URL_BASE + curso["link"]
-                ) as response:
-                    html = await response.text()
-                    selector = Selector(text=html)
+            tasks.append(self.scrapper_cursos_disciplinas(curso, session))
+        for i in range(0, len(tasks), max_exec):
+            await asyncio.gather(*tasks[i: i + max_exec])
 
-                    tr_curso = selector.xpath('//center/table/tr[@class="even"][1]')
-                    codigo, nome = tr_curso.xpath("./td[1]/text()").get().split(" - ", 1)
-                    print(f"Crawler do curso: {nome} - {codigo}")
-                    if nome is not None:
-                        nome = nome.strip()
-                        nome = nome.replace("'", "''")
+    async def scrapper_cursos_disciplinas(self, curso, session):
+        try:
+            async with session.get(
+                    config.LOGIN_SIAC.URL_BASE + curso["link"]
+            ) as response:
+                html = await response.text()
+                selector = Selector(text=html)
 
-                    turno = tr_curso.xpath("./td[2]/text()").get()
-                    if turno is not None:
-                        turno = turno.strip()
-                        turno = turno.replace("'", "''")
-                    duracao_minima = tr_curso.xpath("./td[3]/text()").get()
-                    duracao_maxima = tr_curso.xpath("./td[4]/text()").get()
-                    periodo_curriculo = tr_curso.xpath("./td[5]/text()").get()
-                    descricao_base_legal = selector.xpath(
-                        '//center/table/tr[@class="even"][2]/td/text()'
-                    ).get()
-                    if descricao_base_legal is not None:
-                        descricao_base_legal = re.sub(r'\s+', ' ', descricao_base_legal).strip()
-                        descricao_base_legal = descricao_base_legal.replace("'", "''")
-                    descricao_profissional = selector.xpath(
-                        '//center/table/tr[@class="even"][3]/td/text()'
-                    ).get()
-                    if descricao_profissional is not None:
-                        descricao_profissional = re.sub(r'\s+', ' ', descricao_profissional).strip()
-                        descricao_profissional = descricao_profissional.replace("'", "''")
+                tr_curso = selector.xpath('//center/table/tr[@class="even"][1]')
+                codigo, nome = tr_curso.xpath("./td[1]/text()").get().split(" - ", 1)
+                print(f"Crawler do curso: {nome} - {codigo}")
+                if nome is not None:
+                    nome = nome.strip()
+                    nome = nome.replace("'", "''")
 
-                    table_carga_horaria = selector.xpath("//center[4]/table")
-                    lista_carga_horaria = []
-                    for tr in table_carga_horaria.xpath("./tr[position()>1]"):
-                        descricao = tr.xpath("./td[2]/text()").get()
-                        if descricao:
-                            descricao = descricao.strip()
-                        carga_horaria = tr.xpath("./td[3]/text()").get()
-                        creditacao = tr.xpath("./td[4]/text()").get()
-                        if descricao is None or descricao == "":
-                            descricao = "Carga horária total"
-                            carga_horaria = tr.xpath("./td[3]/b/text()").get()
-                            creditacao = tr.xpath("./td[4]/b/text()").get()
+                turno = tr_curso.xpath("./td[2]/text()").get()
+                if turno is not None:
+                    turno = turno.strip()
+                    turno = turno.replace("'", "''")
+                duracao_minima = tr_curso.xpath("./td[3]/text()").get()
+                duracao_maxima = tr_curso.xpath("./td[4]/text()").get()
+                periodo_curriculo = tr_curso.xpath("./td[5]/text()").get()
+                descricao_base_legal = selector.xpath(
+                    '//center/table/tr[@class="even"][2]/td/text()'
+                ).get()
+                if descricao_base_legal is not None:
+                    descricao_base_legal = re.sub(r'\s+', ' ', descricao_base_legal).strip()
+                    descricao_base_legal = descricao_base_legal.replace("'", "''")
+                descricao_profissional = selector.xpath(
+                    '//center/table/tr[@class="even"][3]/td/text()'
+                ).get()
+                if descricao_profissional is not None:
+                    descricao_profissional = re.sub(r'\s+', ' ', descricao_profissional).strip()
+                    descricao_profissional = descricao_profissional.replace("'", "''")
 
-                        lista_carga_horaria.append(
-                            {
-                                "descricao": descricao,
-                                "carga_horaria": carga_horaria,
-                                "creditacao": creditacao,
-                            }
-                        )
+                table_carga_horaria = selector.xpath("//center[4]/table")
+                lista_carga_horaria = []
+                for tr in table_carga_horaria.xpath("./tr[position()>1]"):
+                    descricao = tr.xpath("./td[2]/text()").get()
+                    if descricao:
+                        descricao = descricao.strip()
+                    carga_horaria = tr.xpath("./td[3]/text()").get()
+                    creditacao = tr.xpath("./td[4]/text()").get()
+                    if descricao is None or descricao == "":
+                        descricao = "Carga horária total"
+                        carga_horaria = tr.xpath("./td[3]/b/text()").get()
+                        creditacao = tr.xpath("./td[4]/b/text()").get()
 
-                    link_obrigatoria = selector.xpath(
-                        "//table/tr[3]/td[2]/div[1]/a[1]/@href"
-                    ).get()
-                    link_optativa = selector.xpath(
-                        "//table/tr[3]/td[2]/div[1]/a[2]/@href"
-                    ).get()
-
-                    curso = Curso(
-                        nome=nome,
-                        codigo=codigo,
-                        link=curso["link"],
-                        turno=turno,
-                        campus="",
-                        duracao_minima=duracao_minima,
-                        duracao_maxima=duracao_maxima,
-                        periodo_curriculo=periodo_curriculo,
-                        descricao_base_legal=descricao_base_legal,
-                        descricao_profissional=descricao_profissional,
-                        info_carga_horaria=lista_carga_horaria,
+                    lista_carga_horaria.append(
+                        {
+                            "descricao": descricao,
+                            "carga_horaria": carga_horaria,
+                            "creditacao": creditacao,
+                        }
                     )
 
-                    CriarScriptCarga("Curso").gerar_script_carga_curso(curso)
+                link_obrigatoria = selector.xpath(
+                    "//table/tr[3]/td[2]/div[1]/a[1]/@href"
+                ).get()
+                link_optativa = selector.xpath(
+                    "//table/tr[3]/td[2]/div[1]/a[2]/@href"
+                ).get()
 
-                    await self.extrair_disciplinas(
-                        session, link_obrigatoria, codigo
-                    )
-                    await self.extrair_disciplinas(
-                        session, link_optativa, codigo
-                    )
+                curso = Curso(
+                    nome=nome,
+                    codigo=codigo,
+                    link=curso["link"],
+                    turno=turno,
+                    campus="",
+                    duracao_minima=duracao_minima,
+                    duracao_maxima=duracao_maxima,
+                    periodo_curriculo=periodo_curriculo,
+                    descricao_base_legal=descricao_base_legal,
+                    descricao_profissional=descricao_profissional,
+                    info_carga_horaria=lista_carga_horaria,
+                )
 
-            except Exception as e:
-                print(f"Erro ao tentar extrair o curso {curso.get('link')}: {e}")
+                CriarScriptCarga("Curso").gerar_script_carga_curso(curso)
+
+                await self.extrair_disciplinas(
+                    session, link_obrigatoria, codigo
+                )
+                await self.extrair_disciplinas(
+                    session, link_optativa, codigo
+                )
+
+        except Exception as e:
+            print(f"Erro ao tentar extrair o curso {curso.get('link')}: {e}")
 
     async def extrair_link_por_tipo_curso(self, session):
         async with session.get(self.url + config.LOGIN_SIAC.URL_CURSOS) as response:
