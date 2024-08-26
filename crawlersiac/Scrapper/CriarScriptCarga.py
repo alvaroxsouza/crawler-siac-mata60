@@ -9,6 +9,7 @@ class CriarScriptCarga:
         self.nome_arquivo_curso = "script_de_carga_curso.sql"
         self.nome_arquivo_curso_disciplina = "script_de_carga_curso_disciplina.sql"
         self.nome_arquivo_disciplina_pre_requisito = "script_de_carga_disciplina_pre_requisito.sql"
+        self.nome_arquivo_departamento = "script_de_carga_departamento.sql"
 
         # Se o arquivo não existir, cria e adiciona um cabeçalho apropriado
         if not os.path.exists(self.nome_arquivo_disciplina):
@@ -56,7 +57,7 @@ class CriarScriptCarga:
     def gerar_script_carga_disciplina(self, disciplina):
 
         # Cria a linha de inserção para a disciplina
-        linha_insert = f"""INSERT INTO Disciplina (codigo_disciplina,nome_disciplina,carga_horaria_pratica,carga_horaria_teorica,carga_horaria_estagio,carga_horaria_total,nome_departamento,ementa,bibliografia,objetivos,conteudo,id_departamento) VALUES ('{disciplina.codigo}','{disciplina.nome}','{disciplina.carga_horaria_pratica}','{disciplina.carga_horaria_teorica}','{disciplina.carga_horaria_estagio}','{disciplina.carga_horaria_total}','{disciplina.departamento}','{disciplina.ementa}','{disciplina.bibliografia}','{disciplina.objetivos}','{disciplina.conteudo}', 0);\n"""
+        linha_insert = f"""INSERT INTO Disciplina (codigo_disciplina,nome_disciplina,carga_horaria_pratica,carga_horaria_teorica,carga_horaria_estagio,carga_horaria_total,ementa,bibliografia,objetivos,conteudo,id_departamento) VALUES ('{disciplina.codigo}','{disciplina.nome}','{disciplina.carga_horaria_pratica}','{disciplina.carga_horaria_teorica}','{disciplina.carga_horaria_estagio}','{disciplina.carga_horaria_total}','{disciplina.ementa}','{disciplina.bibliografia}','{disciplina.objetivos}','{disciplina.conteudo}', {disciplina.id_departamento});\n"""
 
         # Adiciona a linha de inserção ao arquivo
         with open(self.nome_arquivo_disciplina, "a") as arquivo:
@@ -79,4 +80,11 @@ class CriarScriptCarga:
             linha_insert = f"""INSERT INTO DisciplinaPreRequisito (codigo_disciplina, codigo_pre_requisito) VALUES ('{codigo_disciplina}','{codigo_pre_requisito}');\n"""
         # Adiciona a linha de inserção ao arquivo com encoding utf-8-sig
         with open(self.nome_arquivo_disciplina_pre_requisito, "a", encoding="utf-8-sig") as arquivo:
+            arquivo.write(linha_insert)
+
+    def gerar_script_carga_departamento(self, id_departamento, nome_departamento):
+        # Cria a linha de inserção para o relacionamento curso-disciplina
+        linha_insert = f"""INSERT INTO Departamento (id_departamento, nome_departamento) VALUES ({id_departamento}, '{nome_departamento}');\n"""
+        # Adiciona a linha de inserção ao arquivo com encoding utf-8-sig
+        with open(self.nome_arquivo_departamento, "a", encoding="utf-8-sig") as arquivo:
             arquivo.write(linha_insert)

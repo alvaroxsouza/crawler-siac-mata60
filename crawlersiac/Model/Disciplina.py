@@ -13,7 +13,7 @@ class Disciplina:
         carga_horaria_estagio="",
         carga_horaria_total="",
         semestre_vigente="",
-        departamento="",
+        id_departamento="",
         ementa="",
         bibliografia="",
         objetivos="",
@@ -27,7 +27,7 @@ class Disciplina:
         self.carga_horaria_teorica = carga_horaria_teorica
         self.carga_horaria_estagio = carga_horaria_estagio
         self.carga_horaria_total = carga_horaria_total
-        self.departamento = departamento
+        self.id_departamento = id_departamento
         self.ementa = ementa
         self.bibliografia = bibliografia
         self.objetivos = objetivos
@@ -40,7 +40,7 @@ class Disciplina:
             f" {self.codigo} -"
             f" {self.semestre} -"
             f" {self.natureza} -"
-            f" {self.departamento} -"
+            f" {self.id_departamento} -"
             f" {self.semestre_vigente} -"
             f" {self.carga_horaria_total} -"
             f" {self.carga_horaria_teorica} -"
@@ -51,7 +51,7 @@ class Disciplina:
             f" {self.objetivos} -"
             f" {self.conteudo} -"
             f" {self.semestre_vigente} -"
-            f" {self.departamento} -"
+            f" {self.id_departamento} -"
             f" {self.ementa} -"
             f" {self.bibliografia} -"
             f" {self.objetivos} - {self.conteudo} -"

@@ -13,6 +13,8 @@ class Scrapper:
     def __init__(self, url):
         self.url = url
         self.disciplinas_processadas = set()
+        self.departamentos_processados = {}
+        self.auto_increment_departamento = 1
 
     async def __aenter__(self):
         return self
@@ -30,8 +32,7 @@ class Scrapper:
             "senha": config.LOGIN_SIAC.PASSWORD,
         }
 
-    @staticmethod
-    async def extrair_detalhes_disciplina(session, link):
+    async def extrair_detalhes_disciplina(self, session, link):
         try:
             async with session.get(config.LOGIN_SIAC.URL_BASE + link) as response:
                 html = await response.text()
@@ -43,9 +44,17 @@ class Scrapper:
                 carga_horaria_total = str(
                     int(carga_horaria_pratica) + int(carga_horaria_teorica) + int(carga_horaria_estagio))
                 departamento = tr_even_info[1].xpath("./td[4]/text()").get()
+                id_departamento = 0
                 if departamento is not None:
                     departamento = departamento.strip()
                     departamento = departamento.replace("'", "''")
+                    if departamento not in self.departamentos_processados:
+                        id_departamento = self.auto_increment_departamento
+                        self.departamentos_processados[departamento] = id_departamento
+                        CriarScriptCarga().gerar_script_carga_departamento(id_departamento, departamento)
+                        self.auto_increment_departamento += 1
+                else:
+                    id_departamento = 0
 
                 semestre_vigente = tr_even_info[1].xpath("./td[5]/text()").get()
 
@@ -71,6 +80,7 @@ class Scrapper:
                 carga_horaria_estagio,
                 carga_horaria_teorica,
                 carga_horaria_total,
+                id_departamento,
                 departamento,
                 ementa,
                 bibliografia,
@@ -130,6 +140,7 @@ class Scrapper:
                 carga_horaria_estagio,
                 carga_horaria_teorica,
                 carga_horaria_total,
+                id_departamento,
                 departamento,
                 ementa,
                 bibliografia,
@@ -148,6 +159,12 @@ class Scrapper:
             objetivos = ""
             conteudo = ""
             semestre_vigente = ""
+
+        if departamento == "":
+            departamento = "SEM DEPARTAMENTO"
+
+        id_dep = self.departamentos_processados[departamento]
+
         disciplina = Disciplina(
             nome=nome,
             codigo=codigo_disciplina,
@@ -157,7 +174,7 @@ class Scrapper:
             carga_horaria_teorica=carga_horaria_teorica,
             carga_horaria_estagio=carga_horaria_estagio,
             carga_horaria_total=carga_horaria_total,
-            departamento=departamento,
+            id_departamento=id_dep,
             ementa=ementa,
             bibliografia=bibliografia,
             objetivos=objetivos,
