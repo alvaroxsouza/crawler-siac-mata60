@@ -14,8 +14,9 @@ class Scrapper:
         self.url = url
         self.disciplinas_processadas = set()
         self.departamentos_processados = {
-            0: "SEM DEPARTAMENTO",
+            "SEM DEPARTAMENTO": 0,
         }
+        CriarScriptCarga().gerar_script_carga_departamento(0, "SEM DEPARTAMENTO")
         self.auto_increment_departamento = 1
 
     async def __aenter__(self):
@@ -55,8 +56,6 @@ class Scrapper:
                         self.departamentos_processados[departamento] = id_departamento
                         CriarScriptCarga().gerar_script_carga_departamento(id_departamento, departamento)
                         self.auto_increment_departamento += 1
-                else:
-                    id_departamento = 0
 
                 semestre_vigente = tr_even_info[1].xpath("./td[5]/text()").get()
 
@@ -155,15 +154,12 @@ class Scrapper:
             carga_horaria_estagio = 0
             carga_horaria_teorica = 0
             carga_horaria_total = 0
-            departamento = ""
+            departamento = "SEM DEPARTAMENTO"
             ementa = ""
             bibliografia = ""
             objetivos = ""
             conteudo = ""
             semestre_vigente = ""
-
-        if departamento == "":
-            departamento = "SEM DEPARTAMENTO"
 
         id_dep = self.departamentos_processados[departamento]
 
