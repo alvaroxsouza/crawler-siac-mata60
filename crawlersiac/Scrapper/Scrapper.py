@@ -13,7 +13,9 @@ class Scrapper:
     def __init__(self, url):
         self.url = url
         self.disciplinas_processadas = set()
-        self.departamentos_processados = {}
+        self.departamentos_processados = {
+            0: "SEM DEPARTAMENTO",
+        }
         self.auto_increment_departamento = 1
 
     async def __aenter__(self):
