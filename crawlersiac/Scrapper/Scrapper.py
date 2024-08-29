@@ -17,6 +17,23 @@ class Scrapper:
             "SEM DEPARTAMENTO": 0,
         }
         CriarScriptCarga().gerar_script_carga_departamento(0, "SEM DEPARTAMENTO")
+        disciplina_todas = Disciplina(
+            codigo="ESP999",
+            nome="Todas as disciplinas anteriores",
+            natureza="OBRIGATÓRIA",
+            semestre="",
+            carga_horaria_pratica=0,
+            carga_horaria_teorica=0,
+            carga_horaria_estagio=0,
+            carga_horaria_total=0,
+            id_departamento=0,
+            ementa="Todas as disciplinas anteriores",
+            bibliografia="Todas as disciplinas anteriores",
+            objetivos="Todas as disciplinas anteriores",
+            conteudo="Todas as disciplinas anteriores",
+            semestre_vigente="",
+        )
+        CriarScriptCarga().gerar_script_carga_disciplina(disciplina_todas)
         self.auto_increment_departamento = 1
 
     async def __aenter__(self):
